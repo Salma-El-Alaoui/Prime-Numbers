@@ -18,6 +18,6 @@ $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
 	$(CC) $(CPPFLAGS) $< -o $@
 
 clean:
-	rm -f $(OBJ_DIR)/*.o THREAD core
+	rm -f $(OBJ_DIR)/*.o $(EXE) core
 
 
