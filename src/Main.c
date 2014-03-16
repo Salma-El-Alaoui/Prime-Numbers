@@ -16,6 +16,8 @@
 
 //pour éviter de réouvrir le fichier plusieurs fois.
 static FILE * fichier =fopen ("numbers.txt", "r");
+//mutex lecture du fichier
+static pthread_mutex_t mutexFichier;
 
 int is_prime(uint64_t p)
 
@@ -58,6 +60,7 @@ void print_prime_factors(uint64_t n)
 
 }
 
+/* Question 4
 static void * start_routine(void * arg)
 {
 	uint64_t n= (uint64_t)arg;
@@ -65,13 +68,60 @@ static void * start_routine(void * arg)
 	printf("\n");
 	pthread_exit(NULL);
 }
+*/
+static void * start_routine(void * arg)
+{
+	uint64_t p;
+	int lecture=0;
+	while(lecture!=EOF)
+	{
+
+		pthread_mutex_lock(& mutexFichier);
+		lecture=fscanf(fichier,"%llu",&p);
+		pthread_mutex_unlock(& mutexFichier);
+		print_prime_factors(p);
+		printf("\n");
+	}
+
+	pthread_exit(NULL);
+}
+
 
 int main()
 {
+	//Question 6
+	int crdu;
+	pthread_t t1,t2;
+	pthread_mutex_init(& mutexFichier,NULL);
+
+	crdu=pthread_create(&t1,NULL,start_routine,NULL);
+	if(crdu !=0)
+	{
+		exit(-1);
+	}
+	crdu=pthread_create(&t2,NULL,start_routine,NULL);
+	if(crdu !=0)
+	{
+		exit(-1);
+	}
+
+	//attente des threads
+	crdu=pthread_join(t1,NULL);
+	if(crdu !=0)
+	{
+		exit(-1);
+	}
+	crdu=pthread_join(t2,NULL);
+	if(crdu !=0)
+	{
+		exit(-1);
+	}
 	
 	//printf("%d",is_prime(23));
 	//printf("\n");
 	//print_prime_factors(92);
+
+	/* Question 4
 	uint64_t p;
 	while(fscanf(fichier,"%llu",&p)!=EOF)
 	{
@@ -103,10 +153,11 @@ int main()
 			exit(-1);
 		}
 		
-		/*print_prime_factors(p);
-		printf("\n");
-		*/
+		
 	}
+	*/
+	
+
 		
 }
 	
