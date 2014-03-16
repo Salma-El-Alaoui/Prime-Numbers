@@ -14,13 +14,19 @@
 #include <unistd.h>
 #include "Main.h"
 
-//pour éviter de réouvrir le fichier plusieurs fois.
+#define MAX_FACTORS 64
+ // a affiner ?
+
 static FILE * fichier =fopen ("numbers.txt", "r");
-//mutex lecture du fichier
+//pour éviter de réouvrir le fichier plusieurs fois.
+
 static pthread_mutex_t mutexFichier;
+//mutex lecture du fichier
+
+static pthread_mutex_t mutexEcriture;
+//mutex ecriture 
 
 int is_prime(uint64_t p)
-
 {
 	uint64_t i;
 	for(i=2; i<=sqrt(p);i++)
@@ -35,6 +41,30 @@ int is_prime(uint64_t p)
 
 }
 
+int get_prime_factors(uint64_t n, uint64_t * dest)
+{
+	uint64_t i;
+	//uint64_t lim = floor(n/2);
+	uint64_t factors=0;
+	for(i=2; i<=n; i++)
+	{
+		if(is_prime(i) && (n%i ==0) )
+		{
+			while(n%i ==0)
+			{	
+			 	dest[factors]=i;
+			 	factors++;
+				n=n/i;
+			}
+			
+		}
+	}
+
+	return factors;
+}
+
+
+/* version 1 
 void print_prime_factors(uint64_t n)
 {
 	
@@ -48,8 +78,10 @@ void print_prime_factors(uint64_t n)
 		{
 			while(n%i ==0)
 			{	
+				pthread_mutex_lock(& mutexFichier);
 			 	printf("%"PRIu64,i);
 				printf(" ");
+				pthread_mutex_unlock(& mutexFichier);
 				n=n/i;
 			}
 			
@@ -58,7 +90,24 @@ void print_prime_factors(uint64_t n)
 	}
 	
 
+}*/
+
+void print_prime_factors(uint64_t n)
+{
+	uint64_t factors[MAX_FACTORS];
+	int j, k;
+	k=get_prime_factors(n,factors);
+	printf("%llu: ",n);
+	for(j=0;j<k;j++)
+	{
+		printf("%llu ",factors[j]);
+	}
+	printf("\n");
+
 }
+
+
+
 
 /* Question 4
 static void * start_routine(void * arg)
@@ -80,7 +129,7 @@ static void * start_routine(void * arg)
 		lecture=fscanf(fichier,"%llu",&p);
 		pthread_mutex_unlock(& mutexFichier);
 		print_prime_factors(p);
-		printf("\n");
+		
 	}
 
 	pthread_exit(NULL);
@@ -93,6 +142,8 @@ int main()
 	int crdu;
 	pthread_t t1,t2;
 	pthread_mutex_init(& mutexFichier,NULL);
+	pthread_mutex_init(& mutexEcriture,NULL);
+
 
 	crdu=pthread_create(&t1,NULL,start_routine,NULL);
 	if(crdu !=0)
