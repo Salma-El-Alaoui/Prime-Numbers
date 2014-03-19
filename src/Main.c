@@ -40,7 +40,7 @@ int is_prime(uint64_t p)
 	return 1;
 
 }
-
+/* version pour la question8
 int get_prime_factors(uint64_t n, uint64_t * dest)
 {
 	uint64_t i;
@@ -62,9 +62,9 @@ int get_prime_factors(uint64_t n, uint64_t * dest)
 
 	return factors;
 }
+*/
 
-
-/* version 1 
+// version pour la boucle parallèle
 void print_prime_factors(uint64_t n)
 {
 	
@@ -78,20 +78,24 @@ void print_prime_factors(uint64_t n)
 		{
 			while(n%i ==0)
 			{	
-				pthread_mutex_lock(& mutexFichier);
+				pthread_mutex_lock(& mutexEcriture);
 			 	printf("%"PRIu64,i);
 				printf(" ");
-				pthread_mutex_unlock(& mutexFichier);
+				pthread_mutex_unlock(& mutexEcriture);
 				n=n/i;
+				
+				
 			}
 			
 		}
 		
 	}
-	
+	//pthread_mutex_lock(& mutexEcriture);
+	//printf("\n");
+	//pthread_mutex_unlock(& mutexEcriture);
+}
 
-}*/
-
+/*//version pour la question8
 void print_prime_factors(uint64_t n)
 {
 	uint64_t factors[MAX_FACTORS];
@@ -105,20 +109,24 @@ void print_prime_factors(uint64_t n)
 	printf("\n");
 
 }
+*/
 
 
 
 
-/* Question 4
+///version pour la boucle parllele
 static void * start_routine(void * arg)
 {
 	uint64_t n= (uint64_t)arg;
 	print_prime_factors(n);
+	pthread_mutex_lock(& mutexEcriture);
 	printf("\n");
+	pthread_mutex_unlock(& mutexEcriture);
 	pthread_exit(NULL);
 }
-*/
-static void * start_routine(void * arg)
+
+//version pour les workers threads
+/*static void * start_routine(void * arg)
 {
 	uint64_t p;
 	int lecture=0;
@@ -128,23 +136,29 @@ static void * start_routine(void * arg)
 		pthread_mutex_lock(& mutexFichier);
 		lecture=fscanf(fichier,"%llu",&p);
 		pthread_mutex_unlock(& mutexFichier);
-		print_prime_factors(p);
+		if(lecture!=EOF)
+		{
+			print_prime_factors(p);
+		}
 		
+		//pthread_mutex_lock(& mutexEcriture);
+		//printf("\n");
+		//pthread_mutex_unlock(& mutexEcriture);
 	}
 
 	pthread_exit(NULL);
 }
-
-
+*/
 int main()
 {
-	//Question 6
+	//worker-threads
+	/*
 	int crdu;
 	pthread_t t1,t2;
 	pthread_mutex_init(& mutexFichier,NULL);
 	pthread_mutex_init(& mutexEcriture,NULL);
 
-
+	//creation des threads
 	crdu=pthread_create(&t1,NULL,start_routine,NULL);
 	if(crdu !=0)
 	{
@@ -167,32 +181,36 @@ int main()
 	{
 		exit(-1);
 	}
-	
-	//printf("%d",is_prime(23));
-	//printf("\n");
-	//print_prime_factors(92);
+	*/
 
-	/* Question 4
+	/* Decomposition des nombres premiers
 	uint64_t p;
 	while(fscanf(fichier,"%llu",&p)!=EOF)
 	{
-		
-	
+		print_prime_factors(p);
+	}
+	*/
+
+	// Boucle Parallele
+	pthread_mutex_init(& mutexEcriture,NULL);
+	uint64_t p,q;
+	while(fscanf(fichier,"%llu",&p)!=EOF && fscanf(fichier,"%llu",&q)!=EOF)
+	{
 		int crdu;
 		pthread_t t1,t2;
 
+		//creation des threads
 		crdu=pthread_create(&t1,NULL,start_routine,(void *)p);
 		if(crdu !=0)
 		{
 			exit(-1);
 		}
-		crdu=pthread_create(&t2,NULL,start_routine,(void *)p);
-		if(crdu !=0)
+		crdu=pthread_create(&t2,NULL,start_routine,(void *)q);
+		if(crdu!=0)
 		{
 			exit(-1);
-		}
-
-		//attente des threads
+		}		
+		//attente
 		crdu=pthread_join(t1,NULL);
 		if(crdu !=0)
 		{
@@ -202,11 +220,13 @@ int main()
 		if(crdu !=0)
 		{
 			exit(-1);
-		}
-		
-		
+		}		
 	}
-	*/
+	
+
+
+	
+	
 	
 
 		
