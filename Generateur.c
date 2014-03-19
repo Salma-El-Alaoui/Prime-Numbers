@@ -9,12 +9,12 @@ int main(int argc, char *argv[])
     uint64_t *previous_numbers;
 
     // how many numbers to generate
-    int quantity = 20;
+    int quantity = 10;
     if( argc > 1)
         quantity=atoi(argv[1]);
 
     // maximum magnitude of numbers, in bits (0..64)
-    int magnitude= 64;
+    int magnitude= 32;
     if( argc > 2)
         magnitude=atoi(argv[2]);
 

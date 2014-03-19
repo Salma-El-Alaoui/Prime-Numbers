@@ -17,7 +17,7 @@
 #define MAX_FACTORS 64
  // a affiner ?
 
-static FILE * fichier =fopen ("numbers.txt", "r");
+static FILE * fichier =fopen ("nombres.txt", "r");
 //pour éviter de réouvrir le fichier plusieurs fois.
 
 static pthread_mutex_t mutexFichier;
@@ -40,8 +40,8 @@ int is_prime(uint64_t p)
 	return 1;
 
 }
-/* version pour la question8
-int get_prime_factors(uint64_t n, uint64_t * dest)
+// version pour la memorisation
+/*int get_prime_factors(uint64_t n, uint64_t * dest)
 {
 	uint64_t i;
 	//uint64_t lim = floor(n/2);
@@ -64,11 +64,12 @@ int get_prime_factors(uint64_t n, uint64_t * dest)
 }
 */
 
-// version pour la boucle parallèle
+// version pour la boucle parallèle et workers-threads
 void print_prime_factors(uint64_t n)
 {
 	
 	uint64_t i;
+	//pthread_mutex_lock(& mutexEcriture);
 	printf("%"PRIu64,n);
 	printf(": ");
 	for(i=2; i<=n ; i++)
@@ -78,81 +79,79 @@ void print_prime_factors(uint64_t n)
 		{
 			while(n%i ==0)
 			{	
-				pthread_mutex_lock(& mutexEcriture);
+				
 			 	printf("%"PRIu64,i);
 				printf(" ");
-				pthread_mutex_unlock(& mutexEcriture);
-				n=n/i;
-				
-				
+				n=n/i;		
 			}
-			
 		}
-		
 	}
-	//pthread_mutex_lock(& mutexEcriture);
-	//printf("\n");
+	printf("\n");
 	//pthread_mutex_unlock(& mutexEcriture);
 }
 
-/*//version pour la question8
-void print_prime_factors(uint64_t n)
+//version pour la memorisation
+/*void print_prime_factors(uint64_t n)
 {
 	uint64_t factors[MAX_FACTORS];
 	int j, k;
 	k=get_prime_factors(n,factors);
+	pthread_mutex_lock(& mutexEcriture);
 	printf("%llu: ",n);
 	for(j=0;j<k;j++)
 	{
 		printf("%llu ",factors[j]);
 	}
 	printf("\n");
+	pthread_mutex_unlock(& mutexEcriture);
+
 
 }
-*/
 
+*/
 
 
 
 ///version pour la boucle parllele
-static void * start_routine(void * arg)
+
+/*static void * start_routine(void * arg)
 {
 	uint64_t n= (uint64_t)arg;
 	print_prime_factors(n);
-	pthread_mutex_lock(& mutexEcriture);
-	printf("\n");
-	pthread_mutex_unlock(& mutexEcriture);
+	//pthread_mutex_lock(& mutexEcriture);
+	//printf("\n");
+	//pthread_mutex_unlock(& mutexEcriture);
 	pthread_exit(NULL);
 }
-
+*/
 //version pour les workers threads
-/*static void * start_routine(void * arg)
+static void * start_routine(void * arg)
 {
 	uint64_t p;
-	int lecture=0;
-	while(lecture!=EOF)
+	int lecture=1;
+	while(lecture==1)
 	{
 
 		pthread_mutex_lock(& mutexFichier);
 		lecture=fscanf(fichier,"%llu",&p);
+
+		printf("(%"PRIu64")",p);
 		pthread_mutex_unlock(& mutexFichier);
-		if(lecture!=EOF)
+		if(lecture==1)
 		{
 			print_prime_factors(p);
 		}
 		
-		//pthread_mutex_lock(& mutexEcriture);
-		//printf("\n");
-		//pthread_mutex_unlock(& mutexEcriture);
+		
 	}
 
 	pthread_exit(NULL);
 }
-*/
+
 int main()
 {
 	//worker-threads
-	/*
+	
 	int crdu;
 	pthread_t t1,t2;
 	pthread_mutex_init(& mutexFichier,NULL);
@@ -181,19 +180,20 @@ int main()
 	{
 		exit(-1);
 	}
-	*/
+	
 
-	/* Decomposition des nombres premiers
-	uint64_t p;
+	//Decomposition des nombres premiers
+	/*uint64_t p;
 	while(fscanf(fichier,"%llu",&p)!=EOF)
 	{
 		print_prime_factors(p);
 	}
 	*/
+	
 
 	// Boucle Parallele
-	pthread_mutex_init(& mutexEcriture,NULL);
-	uint64_t p,q;
+	//pthread_mutex_init(& mutexEcriture,NULL);
+	/*uint64_t p,q;
 	while(fscanf(fichier,"%llu",&p)!=EOF && fscanf(fichier,"%llu",&q)!=EOF)
 	{
 		int crdu;
@@ -222,13 +222,8 @@ int main()
 			exit(-1);
 		}		
 	}
+	*/
 	
-
-
-	
-	
-	
-
 		
 }
 	
