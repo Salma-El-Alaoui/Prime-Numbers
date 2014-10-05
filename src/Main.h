@@ -1,15 +1,12 @@
-/*
- * Main.h
- *
- *  Created on: 11 mars 2014
- *      Author: selalaouit
- */
 
-#ifndef MAIN_H_
-#define MAIN_H_
+#if ! defined MAIN_H
+#define MAIN_H
 
 
 int is_prime(uint64_t p);
+void find_prime_factors(uint64_t n);
 void print_prime_factors(uint64_t n);
+void readNumber(FILE *f);
+int get_prime_factors(uint64_t n, uint64_t* dest);
 
-#endif /* MAIN_H_ */
+#endif // MAIN_H
